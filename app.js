@@ -6,12 +6,15 @@ const userRoutes = require('./routes/user');
 const dataRetrievalRoutes = require('./routes/dataRetrieval');
 const catalogRoutes = require('./routes/catalog');
 const cookieParser = require('cookie-parser');
+const sql = require('mssql');
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 const passport = require('./middleware/passport');
 const ApiCallDetails = require('./models/ApiCallDetail');
+
+module.exports.pool = new sql.ConnectionPool(dbConfig.dataRetrievalConfig).connect();
 
 app.use(cors({origin:true, credentials:true}));
 app.use(bodyParser.urlencoded({extended: false}));
