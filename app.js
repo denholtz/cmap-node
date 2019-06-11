@@ -7,7 +7,7 @@ const dataRetrievalRoutes = require('./routes/dataRetrieval');
 const catalogRoutes = require('./routes/catalog');
 const cookieParser = require('cookie-parser');
 const sql = require('mssql');
-const dbConfig = require('../config/dbConfig');
+const dbConfig = require('./config/dbConfig');
 
 const app = express();
 const port = process.env.PORT || 8080;
