@@ -4,6 +4,7 @@ const JsonTransformStream = require('../models/JsonTransformStream');
 
 const Transform = require('stream').Transform
 const ndjson = require('ndjson');
+const zlib = require('zlib');
 
 // Calls stored named procedure with the supplied parameters, and streams response to client.
 
@@ -34,11 +35,13 @@ module.exports =  async (argSet, res) => {
     let pool = await new sql.ConnectionPool(dbConfig.dataRetrievalConfig).connect();
     let request = await new sql.Request(pool);
 
-    let ndjsonStream = ndjson.serialize();
-    let transformer = new CustomTransform();
+    const ndjsonStream = ndjson.serialize();
+    const transformer = new CustomTransform();
+    const gzip = zlib.createGzip();
 
     request.pipe(ndjsonStream)
         .pipe(transformer)
+        .pipe(gzip)
         .pipe(res)
 
     // let jsonTransformStream = new JsonTransformStream(res);
