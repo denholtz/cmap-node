@@ -42,9 +42,10 @@ module.exports =  async (argSet, res) => {
     res.writeHead(200, {
         'Transfer-Encoding': 'chunked',
         'charset' : 'utf-8',
-        'Content-Type': 'application/json'            
+        'Content-Type': 'application/json',
+        'Content-Encoding': 'gzip'        
     })
-    
+
     request.pipe(ndjsonStream)
         .pipe(transformer)
         .pipe(gzip)
