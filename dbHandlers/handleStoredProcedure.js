@@ -6,7 +6,7 @@ const Transform = require('stream').Transform
 const ndjson = require('ndjson');
 const zlib = require('zlib');
 
-var globalPool = require('../app').pool;
+var globalPool = require('../app');
 
 // Calls stored named procedure with the supplied parameters, and streams response to client.
 
@@ -34,7 +34,7 @@ class CustomTransform extends Transform {
 }
 
 module.exports =  async (argSet, res) => { 
-    let pool = await globalPool;
+    let pool = await globalPool.pool;
     let request = await new sql.Request(pool);
 
     const ndjsonStream = ndjson.serialize();
