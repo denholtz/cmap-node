@@ -53,6 +53,10 @@ module.exports =  async (argSet, res) => {
         .pipe(gzip)
         .pipe(res)
 
+    request.on('done', () => {
+        console.log('SQL Request finished');
+    })
+
     // let jsonTransformStream = new JsonTransformStream(res);
 
     // request.pipe(jsonTransformStream);

@@ -2,10 +2,45 @@ const sql = require('mssql');
 const dbConfig = require('../config/dbConfig');
 const JsonTransformStream = require('../models/JsonTransformStream');
 const ndjson = require('ndjson');
+var globalPool = require('../app');
+const zlib = require('zlib');
+const Transform = require('stream').Transform
+
+class CustomTransform extends Transform {
+    constructor(){
+        super();
+        this._customBuffer = '';
+        this.flag = false;
+    }
+
+
+    _transform(chunk, encoding, done) {
+        this._customBuffer += chunk.toString();
+        if(this._customBuffer.length >= 4500){            
+            this.push(this._customBuffer);
+            this._customBuffer = '';
+        }
+        done();
+    }
+
+    _flush(done){
+        if(this._customBuffer.length > 0) this.push(this._customBuffer);
+        done();
+    }
+}
 
 module.exports =  async (query, res) => { 
-    let pool = await new sql.ConnectionPool(dbConfig.dataRetrievalConfig).connect();
+    let pool = await globalPool.pool;
     let request = await new sql.Request(pool);
+
+    const ndjsonStream = ndjson.serialize();
+    const transformer = new CustomTransform();
+    const gzip = zlib.createGzip();
+
+    request.pipe(ndjsonStream)
+        .pipe(transformer)
+        .pipe(gzip)
+        .pipe(res)
 
     // let jsonTransformStream = new JsonTransformStream(res);
 
@@ -14,16 +49,16 @@ module.exports =  async (query, res) => {
     res.writeHead(200, {
         'Transfer-Encoding': 'chunked',
         'charset' : 'utf-8',
-        'Content-Type': 'application/json',            
+        'Content-Type': 'application/json',      
+        'Content-Encoding': 'gzip'            
     })
 
-    let ndjsonStream = ndjson.serialize();
+    // let ndjsonStream = ndjson.serialize();
 
-    request.pipe(ndjsonStream);
-    ndjsonStream.pipe(res);
+    // request.pipe(ndjsonStream);
+    // ndjsonStream.pipe(res);
     
     request.query(query);
-    console.log('send query');
     request.on('error', err => {res.end(JSON.stringify(err))});
     // await jsonTransformStream.awaitableStreamEnd;
 };

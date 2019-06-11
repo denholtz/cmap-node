@@ -7,6 +7,7 @@ const errors = require('../errorHandling/errorsStrings');
 exports.customQuery = async (req, res, next)=>{
     // Executes a custom written query on the sql server and returns the result as json.
     const query = req.query.query;
+    console.log('Handling custom query');
     console.log(query);
     if (!query) {return res.status(500).json({error: errors.customQueryMissing})};
 
