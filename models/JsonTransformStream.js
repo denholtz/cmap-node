@@ -29,8 +29,7 @@ module.exports = class JsonTransformStream extends Transform{
         res.writeHead(200, {
             'Transfer-Encoding': 'chunked',
             'charset' : 'utf-8',
-            'Content-Type': 'application/json',
-            
+            'Content-Type': 'application/json'            
         })
     }
 

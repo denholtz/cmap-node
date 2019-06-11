@@ -39,6 +39,12 @@ module.exports =  async (argSet, res) => {
     const transformer = new CustomTransform();
     const gzip = zlib.createGzip();
 
+    res.writeHead(200, {
+        'Transfer-Encoding': 'chunked',
+        'charset' : 'utf-8',
+        'Content-Type': 'application/json'            
+    })
+    
     request.pipe(ndjsonStream)
         .pipe(transformer)
         .pipe(gzip)
