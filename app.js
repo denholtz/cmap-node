@@ -13,6 +13,9 @@ const port = process.env.PORT || 8080;
 const passport = require('./middleware/passport');
 const ApiCallDetails = require('./models/ApiCallDetail');
 
+const compression = require('compression');
+
+app.use(compression());
 app.use(cors({origin:true, credentials:true}));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
