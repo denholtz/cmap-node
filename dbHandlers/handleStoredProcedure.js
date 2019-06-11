@@ -38,7 +38,7 @@ module.exports =  async (argSet, res) => {
     let transformer = new CustomTransform();
 
     request.pipe(ndjsonStream)
-        .pipe(transformer)
+        // .pipe(transformer)
         .pipe(res)
 
     // let jsonTransformStream = new JsonTransformStream(res);
