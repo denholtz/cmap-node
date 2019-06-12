@@ -15,7 +15,8 @@ const port = process.env.PORT || 8080;
 const passport = require('./middleware/passport');
 const ApiCallDetails = require('./models/ApiCallDetail');
 
-module.exports.pool = new sql.ConnectionPool(dbConfig.dataRetrievalConfig).connect();
+module.exports.readOnlyPool = new sql.ConnectionPool(dbConfig.dataRetrievalConfig).connect();
+module.exports.userPool = new sql.ConnectionPool(dbConfig.userTableConfig).connect();
 
 app.use(cors({origin:true, credentials:true}));
 app.use(bodyParser.urlencoded({extended: false}));

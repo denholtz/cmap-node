@@ -3,7 +3,7 @@ module.exports.dataRetrievalConfig = {
     server: process.env.DB_SERVER,
     port: process.env.DB_PORT,
     database: "Opedia",
-    user: process.env.DBUSER,
+    user: process.env.DB_USER,
     password: process.env.DBPASSWORD,
     connectionTimeout: 50000,
     requestTimeout: 50000,

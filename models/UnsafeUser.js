@@ -5,6 +5,8 @@ const sql = require('mssql');
 const userTable = 'tblUsers'
 const apiKeyTable = 'tblApi_Keys'
 
+var pools = require('../app');
+
 // Instances of this class contain sensitive information
 // and should never be sent to the client directly. See makeSafe
 module.exports = class UnsafeUser {
@@ -26,7 +28,7 @@ module.exports = class UnsafeUser {
     }
 
     static async getUserByUsername(username){
-        let pool = await new sql.ConnectionPool(userDBConfig).connect();
+        let pool = await pools.userPool;
         let request = await new sql.Request(pool);
         request.input('username', sql.NVarChar, username);
         request.on('error', err => console.log(err));
@@ -35,7 +37,7 @@ module.exports = class UnsafeUser {
     }
 
     static async getUserByEmail(email){
-        let pool = await new sql.ConnectionPool(userDBConfig).connect();
+        let pool = await pools.userPool;
         let request = await new sql.Request(pool);
         request.input('email', sql.NVarChar, email);
         request.on('error', err => console.log(err));
@@ -44,7 +46,7 @@ module.exports = class UnsafeUser {
     }
 
     static async getUserByApiKey(key){
-        let pool = await new sql.ConnectionPool(userDBConfig).connect();
+        let pool = await pools.userPool;
         let request = await new sql.Request(pool);
         request.input('key', sql.NVarChar, key);
         request.on('error', err => console.log(err));
@@ -53,7 +55,7 @@ module.exports = class UnsafeUser {
     }
 
     static async getApiKeysByUserID(id){
-        let pool = await new sql.ConnectionPool(userDBConfig).connect();
+        let pool = await pools.userPool;
         let request = await new sql.Request(pool);
         request.input('user_id', sql.Int, id);
         request.on('error', err => console.log(err));
@@ -76,7 +78,7 @@ module.exports = class UnsafeUser {
     // }
 
     async validateUsernameAndEmail(){
-        let pool = await new sql.ConnectionPool(userDBConfig).connect();
+        let pool = await pools.userPool;
         let request = await new sql.Request(pool);
         request.input('username', sql.NVarChar, this.userName);
         request.input('email', sql.NVarChar, this.email);
@@ -93,7 +95,7 @@ module.exports = class UnsafeUser {
         
             // await this.validateNewUser(); 
 
-            let pool = await new sql.ConnectionPool(userDBConfig).connect();
+            let pool = await pools.userPool;
             let request = await new sql.Request(pool);
             let hashedPassword = await bcrypt.hash(this.password, 10)
             let query = `INSERT INTO ${userTable} (FirstName, FamilyName, Username, Password, Email, Institute, Department, Country) VALUES (@firstname, @lastname, @username, @password, @email, @institute, @department, @country)`;

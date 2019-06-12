@@ -2,7 +2,7 @@ const sql = require('mssql');
 const dbConfig = require('../config/dbConfig');
 const JsonTransformStream = require('../models/JsonTransformStream');
 const ndjson = require('ndjson');
-var globalPool = require('../app');
+var pools = require('../app');
 const zlib = require('zlib');
 const Transform = require('stream').Transform
 
@@ -16,7 +16,7 @@ class CustomTransform extends Transform {
 
     _transform(chunk, encoding, done) {
         this._customBuffer += chunk.toString();
-        if(this._customBuffer.length >= 13500){            
+        if(this._customBuffer.length >= 4500){            
             this.push(this._customBuffer);
             this._customBuffer = '';
         }
@@ -30,7 +30,7 @@ class CustomTransform extends Transform {
 }
 
 module.exports =  async (query, res) => { 
-    let pool = await globalPool.pool;
+    let pool = await pools.readOnlyPool;
     let request = await new sql.Request(pool);
 
     const ndjsonStream = ndjson.serialize();
