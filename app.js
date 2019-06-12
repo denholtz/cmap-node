@@ -42,7 +42,8 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/user', userRoutes);
-app.use('/dataretrieval', passport.authenticate(['headerapikey', 'jwt'], {session: false}), dataRetrievalRoutes);
+// app.use('/dataretrieval', passport.authenticate(['headerapikey', 'jwt'], {session: false}), dataRetrievalRoutes);
+app.use('/dataretrieval', dataRetrievalRoutes);
 app.use('/catalog', catalogRoutes);
 app.use('/authtest', passport.authenticate(['local', 'headerapikey', 'jwt'], {session:false}), (req, res, next) => {res.json(req.user); next()});
 
