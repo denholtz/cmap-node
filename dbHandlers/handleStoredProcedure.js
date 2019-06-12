@@ -20,7 +20,7 @@ class CustomTransform extends Transform {
 
     _transform(chunk, encoding, done) {
         this._customBuffer += chunk.toString();
-        if(this._customBuffer.length >= 4500){            
+        if(this._customBuffer.length >= 13500){            
             this.push(this._customBuffer);
             this._customBuffer = '';
         }

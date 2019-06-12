@@ -16,7 +16,7 @@ class CustomTransform extends Transform {
 
     _transform(chunk, encoding, done) {
         this._customBuffer += chunk.toString();
-        if(this._customBuffer.length >= 4500){            
+        if(this._customBuffer.length >= 13500){            
             this.push(this._customBuffer);
             this._customBuffer = '';
         }
@@ -54,7 +54,7 @@ module.exports =  async (query, res) => {
     })
     
     let start = new Date();
-    
+
     request.query(query);
     request.on('error', err => {res.end(JSON.stringify(err))});
     
