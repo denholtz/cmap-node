@@ -53,7 +53,13 @@ module.exports =  async (query, res) => {
         'Content-Encoding': 'gzip'            
     })
     
+    let start = new Date();
+    
     request.query(query);
     request.on('error', err => {res.end(JSON.stringify(err))});
-    // await jsonTransformStream.awaitableStreamEnd;
+    
+    request.on('done', () => {
+        console.log(`${query} ---- finished in:`)
+        console.log(new Date() - start);
+    })
 };

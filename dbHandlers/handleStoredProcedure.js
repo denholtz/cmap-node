@@ -48,13 +48,16 @@ module.exports =  async (argSet, res) => {
         'Content-Encoding': 'gzip'        
     })
 
+    let start = new Date();
+
     request.pipe(ndjsonStream)
         .pipe(transformer)
         .pipe(gzip)
         .pipe(res)
 
     request.on('done', () => {
-        console.log('SQL Request finished');
+        console.log('SPROC finished in:')
+        console.log(new Date() - start);
     })
 
     // let jsonTransformStream = new JsonTransformStream(res);
