@@ -52,11 +52,6 @@ module.exports =  async (query, res) => {
         'Content-Type': 'application/json',      
         'Content-Encoding': 'gzip'            
     })
-
-    // let ndjsonStream = ndjson.serialize();
-
-    // request.pipe(ndjsonStream);
-    // ndjsonStream.pipe(res);
     
     request.query(query);
     request.on('error', err => {res.end(JSON.stringify(err))});
