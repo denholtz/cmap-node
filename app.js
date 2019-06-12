@@ -25,7 +25,6 @@ app.use(cookieParser());
 // Redirect www.simonscmap.io to simonscmap.io
 app.use((req, res, next) => {
     if (req.headers.host.slice(0, 4) === 'www.') {
-        console.log('redirected www');
         var newHost = req.headers.host.slice(4);
         return res.redirect(302, req.protocol + '://' + newHost + req.originalUrl);
     }

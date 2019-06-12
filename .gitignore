@@ -1,2 +1,4 @@
 node_modules/
 client/
+config/UNSAFE_dbConfig.js
+config/UNSAFE_jwtConfig.js
