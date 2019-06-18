@@ -14,7 +14,12 @@ const ApiCallDetails = require('./models/ApiCallDetail');
 const app = express();
 const port = process.env.PORT || 8080;
 
-
+app.use((req, res, next) => {
+    console.log(req.subdomains);
+    if(req.subdomains.includes('docs')){
+        res.redirect(301, 'https://cmap.readthedocs.io/en/latest/');
+    }
+})
 
 // Redirect www.simonscmap.io to simonscmap.io
 app.use((req, res, next) => {
