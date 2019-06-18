@@ -1,50 +1,21 @@
 const sql = require('mssql');
-const dbConfig = require('../config/dbConfig');
-const JsonTransformStream = require('../models/JsonTransformStream');
 const ndjson = require('ndjson');
-var pools = require('../app');
+var pools = require('./dbPools');
 const zlib = require('zlib');
-const Transform = require('stream').Transform
-
-class CustomTransform extends Transform {
-    constructor(){
-        super();
-        this._customBuffer = '';
-        this.flag = false;
-    }
-
-
-    _transform(chunk, encoding, done) {
-        this._customBuffer += chunk.toString();
-        if(this._customBuffer.length >= 4500){            
-            this.push(this._customBuffer);
-            this._customBuffer = '';
-        }
-        done();
-    }
-
-    _flush(done){
-        if(this._customBuffer.length > 0) this.push(this._customBuffer);
-        done();
-    }
-}
+const CustomTransformStream = require('../utility/CustomTransformStream');
 
 module.exports =  async (query, res) => { 
-    let pool = await pools.readOnlyPool;
+    let pool = await pools.dataReadOnlyPool;
     let request = await new sql.Request(pool);
 
     const ndjsonStream = ndjson.serialize();
-    const transformer = new CustomTransform();
     const gzip = zlib.createGzip();
+    const transformer = new CustomTransformStream();
 
     request.pipe(ndjsonStream)
         .pipe(transformer)
         .pipe(gzip)
         .pipe(res)
-
-    // let jsonTransformStream = new JsonTransformStream(res);
-
-    // request.pipe(jsonTransformStream);
 
     res.writeHead(200, {
         'Transfer-Encoding': 'chunked',
@@ -52,14 +23,9 @@ module.exports =  async (query, res) => {
         'Content-Type': 'application/json',      
         'Content-Encoding': 'gzip'            
     })
-    
-    let start = new Date();
+
+    // .pipe does not close on error so we need to close all the streams conditionally when the response ends
 
     request.query(query);
     request.on('error', err => {res.end(JSON.stringify(err))});
-    
-    request.on('done', () => {
-        console.log(`${query} ---- finished in:`)
-        console.log(new Date() - start);
-    })
 };

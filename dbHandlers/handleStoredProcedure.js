@@ -1,45 +1,18 @@
 const sql = require('mssql');
-
-const Transform = require('stream').Transform
 const ndjson = require('ndjson');
 const zlib = require('zlib');
 
-var pools = require('../app');
+var pools = require('./dbPools');
+const CustomTransformStream = require('../utility/CustomTransformStream');
 
-var readOnlyPool = require('../app').readOnlyPool;
-
-
-// Calls stored named procedure with the supplied parameters, and streams response to client.
-
-class CustomTransform extends Transform {
-    constructor(){
-        super();
-        this._customBuffer = '';
-        this.flag = false;
-    }
-
-
-    _transform(chunk, encoding, done) {
-        this._customBuffer += chunk.toString();
-        if(this._customBuffer.length >= 4500){            
-            this.push(this._customBuffer);
-            this._customBuffer = '';
-        }
-        done();
-    }
-
-    _flush(done){
-        if(this._customBuffer.length > 0) this.push(this._customBuffer);
-        done();
-    }
-}
-
+// Calls stored named procedure with the supplied parameters, and 
+// streams response to as gzipped ndjsonclient.
 module.exports =  async (argSet, res) => { 
-    let pool = await pools.readOnlyPool;
+    let pool = await pools.dataReadOnlyPool;
     let request = await new sql.Request(pool);
 
     const ndjsonStream = ndjson.serialize();
-    const transformer = new CustomTransform();
+    const transformer = new CustomTransformStream();
     const gzip = zlib.createGzip();
 
     res.writeHead(200, {
@@ -49,21 +22,11 @@ module.exports =  async (argSet, res) => {
         'Content-Encoding': 'gzip'        
     })
 
-    let start = new Date();
-
     request.pipe(ndjsonStream)
         .pipe(transformer)
         .pipe(gzip)
         .pipe(res)
 
-    request.on('done', () => {
-        console.log('SPROC finished in:')
-        console.log(new Date() - start);
-    })
-
-    // let jsonTransformStream = new JsonTransformStream(res);
-
-    // request.pipe(jsonTransformStream);
     request.input('tableName', sql.NVarChar, argSet.tableName);
     request.input('fields', sql.NVarChar, argSet.fields);
     request.input('dt1', sql.NVarChar, argSet.dt1);
@@ -75,8 +38,8 @@ module.exports =  async (argSet, res) => {
     request.input('depth1', sql.NVarChar, argSet.depth1);
     request.input('depth2', sql.NVarChar, argSet.depth2);
 
+    // .pipe does not close on error so we need to close all the streams conditionally when the response ends
+
     request.execute(argSet.spName);
     request.on('error', err => res.end(JSON.stringify(err)));
-
-    // await jsonTransformStream.awaitableStreamEnd;
 };
