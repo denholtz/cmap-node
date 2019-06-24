@@ -64,6 +64,7 @@ passport.use(new HeaderApiKeyStrategy(
     headerApiKeyOpts,
     true,
     async function(apiKey, done, req){
+        console.log('Api Key Check')
         try {
             let unsafeUser = new UnsafeUser(await UnsafeUser.getUserByApiKey(apiKey));
             req.cmapApiCallDetails.authMethod = authMethodMapping.apiKey;
@@ -71,7 +72,7 @@ passport.use(new HeaderApiKeyStrategy(
             req.cmapApiCallDetails.apiKeyID = unsafeUser.apiKeyID;
             return done(null, unsafeUser.makeSafe());
         } catch (e){
-            return done(e, false);
+            return done(null, false);
         }
     }        
     ))
