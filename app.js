@@ -14,23 +14,6 @@ const ApiCallDetails = require('./models/ApiCallDetail');
 const app = express();
 const port = process.env.PORT || 8080;
 
-//Redirect docs domain to 
-app.use((req, res, next) => {
-    if(req.subdomains.includes('docs')){
-        res.redirect(302, 'https://cmap.readthedocs.io/en/latest/');
-    }
-    next();
-})
-
-// Redirect www.simonscmap.io to simonscmap.io
-app.use((req, res, next) => {
-    if (req.headers.host.slice(0, 4) === 'www.') {
-        var newHost = req.headers.host.slice(4);
-        return res.redirect(302, req.protocol + '://' + newHost + req.originalUrl);
-    }
-    next();
-});
-
 // Middleware
 app.use(cors({origin:true, credentials:true}));
 app.use(bodyParser.urlencoded({extended: false}));
