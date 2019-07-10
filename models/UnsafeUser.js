@@ -51,7 +51,7 @@ module.exports = class UnsafeUser {
         request.on('error', err => console.log(err));
         let result = await request.query(`SELECT TOP 1 *,${apiKeyTable}.ID as Api_Key_ID FROM ${userTable} JOIN ${apiKeyTable} on ${apiKeyTable}.User_ID = ${userTable}.UserID WHERE Api_Key = @key`);
         
-        //Throw user not found error if no results
+        //Throw not found error if no results
         if(!result.recordset.length) throw new Error('API Key not found');
         
         return result.recordset[0];
