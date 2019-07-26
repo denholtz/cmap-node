@@ -9,8 +9,9 @@ const apiCallDetailsTable = "tblApi_Call_Details";
 module.exports = class ApiCallRecord{
     constructor(req){
         this.ip = req.ip;
-        this.hostName = req.headers.host;
+        this.clientHostName = req.headers.host;
         this.routeID = mapPathToRouteId(req.path);
+        this.startTime = new Date();
     }
 
     // Save the usage details to SQL
@@ -19,56 +20,46 @@ module.exports = class ApiCallRecord{
         let request = await new sql.Request(pool);
 
         request.input('Ip_Address',sql.VarChar, this.ip);
-        request.input('Host_Name', sql.VarChar, this.hostName);
-        request.input('User_ID', sql.Int, this.userID);
+        request.input('Client_Host_Name', sql.VarChar, this.clientHostName || null);
+        request.input("Client_OS", sql.VarChar, this.clientOS || null);
+        request.input("Client_Browser", sql.VarChar, this.clientBrowser || null);
+        request.input('User_ID', sql.Int, this.userID || 1);
         request.input('Route_ID', sql.Int, this.routeID);
-        request.input('Auth_Method', sql.Int, this.authMethod);
-        if(this.apiKeyID) request.input('Api_Key_ID', sql.Int, this.apiKeyID);
+        request.input('Auth_Method', sql.Int, this.authMethod || 0);
+        request.input('Query', sql.VarChar, this.query || null);
+        request.input('Api_Key_ID', sql.Int, this.apiKeyID || null);
+        request.input('Request_Duration', sql.Int, new Date() - this.startTime);
 
         request.on('error', (err) => console.log(err));
 
         var query = `INSERT INTO ${apiCallsTable} (
             Ip_Address, 
-            Host_Name, 
+            Client_Host_Name,
+            Client_OS,
+            Client_Browser,
             User_ID, 
             Route_ID, 
-            ${this.apiKeyID ? 'Api_Key_ID,' : ''} 
-            Auth_Method) VALUES (
+            Query,
+            Api_Key_ID, 
+            Auth_Method,
+            Request_Duration) 
+            VALUES (
                 @Ip_Address,
-                @Host_Name,
+                @Client_Host_Name,
+                @Client_OS,
+                @Client_Browser,
                 @User_ID,
                 @Route_ID,
-                ${this.apiKeyID ? '@Api_Key_ID,' : ''}
-                @Auth_Method
+                @Query,
+                @Api_Key_ID,
+                @Auth_Method,
+                @Request_Duration
             )
-            
-            SELECT SCOPE_IDENTITY() as id`
+            `
         
         try {
-            var result = await request.query(query);
-            var newRowID = result.recordset[0].id;
+            await request.query(query);
         } catch (e) {return console.log(e)}
 
-        // Create call details row on data retrieval routes only
-        if(Math.floor(this.routeID / 100) === 3){
-            request = await new sql.Request(pool);
-
-            request.input('Sproc_Args', sql.VarChar, this.sprocArgs || null);
-            request.input('Query', sql.VarChar, this.query || null);
-
-            request.on('error', (err) => console.log(err));
-
-            query = `INSERT INTO ${apiCallDetailsTable} (
-                Api_Call_ID,
-                Stored_Procedure_Parameters,
-                Query
-            ) VALUES (
-                ${newRowID},
-                @Sproc_Args,
-                @Query
-            )`
-
-            request.query(query);
-        }
     }
 }

@@ -18,10 +18,13 @@ exports.customQuery = async (req, res, next)=>{
 exports.storedProcedure = async (req, res, next)=>{
     // Calls a stored procedure with parameters supplied by the user and returns the result as json.
     // req.query is the built-in name for the query string arguments
-    const argSet = new StoredProcedureArgumentSet(req.query);
-    if(!argSet.isValid()) return res.status(500).json({error: errors.storedProcedureArgumentMissing});
 
-    await handleStoredProcedure(argSet, res);
-    req.cmapApiCallDetails.sprocArgs = JSON.stringify(argSet);
+    // StoredProcedureArgumentSet is not in use because we moved to positional arguments
+    // const argSet = new StoredProcedureArgumentSet(req.query);
+    // if(!argSet.isValid()) return res.status(500).json({error: errors.storedProcedureArgumentMissing});
+
+    await handleStoredProcedure(req.query, res, next);
+
+    req.cmapApiCallDetails.query = JSON.stringify(req.query);
     next();
 };

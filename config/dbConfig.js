@@ -5,10 +5,10 @@ module.exports.dataRetrievalConfig = {
     database: "Opedia",
     user: process.env.DB_READ_ONLY_USER,
     password: process.env.DB_READ_ONLY_PASSWORD,
-    connectionTimeout: 50000,
-    requestTimeout: 50000,
+    connectionTimeout: 86000000,
+    requestTimeout: 86000000,
     pool: {
-        idleTimeoutMillis: 50000,
+        idleTimeoutMillis: 86000000,
         max: 100
     }
 }
