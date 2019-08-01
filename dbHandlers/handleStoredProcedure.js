@@ -8,13 +8,12 @@ const CustomTransformStream = require('../utility/CustomTransformStream');
 // Calls stored named procedure with the supplied parameters, and 
 // streams response to client as gzipped ndjson.
 module.exports =  async (argSet, res, next) => { 
-    console.log(argSet);
     let pool = await pools.dataReadOnlyPool;
     let request = await new sql.Request(pool);
 
     const ndjsonStream = ndjson.serialize();
     const transformer = new CustomTransformStream();
-    const gzip = zlib.createGzip();
+    const gzip = zlib.createGzip({level:1});
 
     res.writeHead(200, {
         'Transfer-Encoding': 'chunked',

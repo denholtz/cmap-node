@@ -8,10 +8,21 @@ const apiCallDetailsTable = "tblApi_Call_Details";
 
 module.exports = class ApiCallRecord{
     constructor(req){
-        this.ip = req.ip;
+        console.log('Headers');
+        console.log(req.headers);
+        console.log('x-forwarded-for:');
+        let xf = req.headers['x-forwarded-for']
+        console.log(xf);
+        if(xf){
+            console.log(req.headers['x-forwarded-for'].split(','));
+            console.log(req.headers['x-forwarded-for'].split(',')[0]);
+        }
+        this.ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0] : req.ip || 'None';
         this.clientHostName = req.headers.host;
         this.routeID = mapPathToRouteId(req.path);
         this.startTime = new Date();
+        this.clientBrowser = req.useragent.browser || null;
+        this.clientOS = req.useragent.os || null;
     }
 
     // Save the usage details to SQL
